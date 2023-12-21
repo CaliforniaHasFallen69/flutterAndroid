@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import 'transaksi.dart'; // Import halaman transaksi
+import 'transaksi.dart';
 
 class DashboardPage extends StatefulWidget {
   final String accessToken;
@@ -80,42 +79,55 @@ class _DashboardPageState extends State<DashboardPage> {
       appBar: AppBar(
         title: Text('Dashboard'),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text(
-              'Welcome, $username!',
-              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 24.0),
-            DropdownButton<String>(
-              value: selectedShift,
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    selectedShift = newValue;
-                  });
-                }
-              },
-              items: <String>['Shift 1', 'Shift 2']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 20.0),
-            ElevatedButton(
-              onPressed: () {
-                fetchShiftData(selectedShift);
-              },
-              child: Text('View Transactions'),
-            ),
-          ],
+      body: Container(
+        decoration: BoxDecoration(
+          color: Colors.orange[200],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text(
+                'Welcome, $username!',
+                style: TextStyle(fontSize: 30.0, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24.0),
+              DropdownButton<String>(
+                value: selectedShift,
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      selectedShift = newValue;
+                    });
+                  }
+                },
+                items: <String>['Shift 1', 'Shift 2']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+              SizedBox(height: 20.0),
+              ElevatedButton(
+                onPressed: () {
+                  fetchShiftData(selectedShift);
+                },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.deepOrange,
+                  textStyle: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: Text('View Transactions'),
+              ),
+            ],
+          ),
         ),
       ),
     );

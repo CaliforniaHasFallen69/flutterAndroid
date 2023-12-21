@@ -4,12 +4,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class LoginForm extends StatefulWidget {
-  const LoginForm({super.key});
+  const LoginForm({Key? key}) : super(key: key);
 
   @override
   _LoginFormState createState() => _LoginFormState();
 }
- Future<void> loginUser(
+
+Future<void> loginUser(
     String username, String password, BuildContext context) async {
   final url = Uri.parse('http://10.0.2.2:1000/login');
 
@@ -27,9 +28,10 @@ class LoginForm extends StatefulWidget {
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => DashboardPage(
-                  accessToken: accessToken,
-                )),
+          builder: (context) => DashboardPage(
+            accessToken: accessToken,
+          ),
+        ),
       );
     } else {
       final errorMessage = json.decode(response.body)['message'];
@@ -39,10 +41,10 @@ class LoginForm extends StatefulWidget {
     print('Error: $error');
   }
 }
+
 class _LoginFormState extends State<LoginForm> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
 
   @override
   Widget build(BuildContext context) {
@@ -50,38 +52,69 @@ class _LoginFormState extends State<LoginForm> {
       appBar: AppBar(
         title: Text('Login'),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            TextFormField(
-              controller: _usernameController,
-              decoration: InputDecoration(
-                labelText: 'Username',
-                border: OutlineInputBorder(),
+      body: Container(
+        decoration: BoxDecoration(
+          color: Colors.orange[200],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              Text(
+                'Warmindo Inspirasi Indonesia',
+                style: TextStyle(
+                  fontSize: 36.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange, 
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            SizedBox(height: 16.0),
-            TextFormField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
+              SizedBox(height: 40.0),
+              Image.asset(
+                'assets/Warmindo.jpg',
+                height: 100.0,
+                width: 100.0,
+                fit: BoxFit.cover,
               ),
-            ),
-            SizedBox(height: 24.0),
-            ElevatedButton(
-              onPressed: () {
-                loginUser(_usernameController.text,
-                _passwordController.text,
-                 context);
-              },
-              child: Text('Login'),
-            ),
-          ],
+              SizedBox(height: 40.0),
+              TextFormField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 24.0),
+              ElevatedButton(
+                onPressed: () {
+                  loginUser(
+                    _usernameController.text,
+                    _passwordController.text,
+                    context,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.deepOrange,
+                  textStyle: TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                child: Text('LOGIN'),
+              ),
+            ],
+          ),
         ),
       ),
     );

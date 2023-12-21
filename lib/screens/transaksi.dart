@@ -148,8 +148,15 @@ class TransactionPage extends StatelessWidget {
               }));
             },
             child: Card(
+              color: Colors.deepOrange[100], // Customize the card color
               child: ListTile(
-                title: Text('Transaction ID: ${transaction.idTransaksi}'),
+                title: Text(
+                  'Transaction ID: ${transaction.idTransaksi}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepOrange,
+                  ),
+                ),
                 subtitle: Text('Amount: ${transaction.total}'),
               ),
             ),

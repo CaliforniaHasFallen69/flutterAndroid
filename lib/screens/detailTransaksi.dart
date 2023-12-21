@@ -7,21 +7,22 @@ class detailTransaksi extends StatefulWidget {
   final int idTransaksi;
   final String accessToken;
   final String selectedShift;
-  const detailTransaksi(
-      {Key? key,
-      required this.idTransaksi,
-      required this.accessToken,
-      required this.selectedShift})
-      : super(key: key);
+
+  const detailTransaksi({
+    Key? key,
+    required this.idTransaksi,
+    required this.accessToken,
+    required this.selectedShift,
+  }) : super(key: key);
 
   @override
-  State<detailTransaksi> createState() => _detailTransaksiState();
+  State<detailTransaksi> createState() => _DetailTransaksiState();
 }
 
-class _detailTransaksiState extends State<detailTransaksi> {
+class _DetailTransaksiState extends State<detailTransaksi> {
   var selectedPayment = null;
 
-  Future<Map<String, dynamic>> fetchdetailTransaksi(int idTransaksi) async {
+  Future<Map<String, dynamic>> fetchDetailTransaksi(int idTransaksi) async {
     final response = await http.get(
       Uri.parse('http://10.0.2.2:1000/detailTransaksi/$idTransaksi'),
     );
@@ -65,8 +66,7 @@ class _detailTransaksiState extends State<detailTransaksi> {
       );
 
       if (response.statusCode == 200) {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
           return detailTransaksi(
             idTransaksi: widget.idTransaksi,
             accessToken: widget.accessToken,
@@ -93,11 +93,11 @@ class _detailTransaksiState extends State<detailTransaksi> {
 
       if (response.statusCode == 200) {
         Navigator.pop(context);
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
           return TransactionPage(
-              accessToken: widget.accessToken,
-              selectedShift: widget.selectedShift);
+            accessToken: widget.accessToken,
+            selectedShift: widget.selectedShift,
+          );
         }));
       } else {
         print('Failed to delete transaction');
@@ -119,16 +119,6 @@ class _detailTransaksiState extends State<detailTransaksi> {
       );
 
       if (response.statusCode == 200) {
-        // Navigator.pushReplacement(context,
-        //     MaterialPageRoute(builder: (context) {
-        //   return detailTransaksi(
-        //     idTransaksi: widget.idTransaksi,
-        //     accessToken: widget.accessToken,
-        //     selectedShift: widget.selectedShift,
-        //   );
-        // }
-        // )
-        // );
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Berhasil mengubah metode pembayaran"),
         ));
@@ -150,7 +140,7 @@ class _detailTransaksiState extends State<detailTransaksi> {
     return Scaffold(
       body: SafeArea(
         child: FutureBuilder(
-          future: fetchdetailTransaksi(widget.idTransaksi),
+          future: fetchDetailTransaksi(widget.idTransaksi),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
@@ -203,7 +193,7 @@ class _detailTransaksiState extends State<detailTransaksi> {
                       break;
                   }
                   updateMetodePembayaran(newValue!);
-                  fetchdetailTransaksi(widget.idTransaksi);
+                  fetchDetailTransaksi(widget.idTransaksi);
                 });
               }
             },
