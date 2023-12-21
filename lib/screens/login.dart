@@ -4,61 +4,45 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class LoginForm extends StatefulWidget {
+  const LoginForm({super.key});
+
   @override
   _LoginFormState createState() => _LoginFormState();
 }
+ Future<void> loginUser(
+    String username, String password, BuildContext context) async {
+  final url = Uri.parse('http://10.0.2.2:1000/login');
 
+  try {
+    final response = await http.post(
+      url,
+      body: json.encode({'username': username, 'password': password}),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      final accessToken = responseData['accessToken'];
+      // Lakukan sesuatu dengan token, seperti menyimpannya ke SharedPreferences
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => DashboardPage(
+                  accessToken: accessToken,
+                )),
+      );
+    } else {
+      final errorMessage = json.decode(response.body)['message'];
+      print(errorMessage);
+    }
+  } catch (error) {
+    print('Error: $error');
+  }
+}
 class _LoginFormState extends State<LoginForm> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  Future<void> _login(BuildContext context) async {
-    String username = _usernameController.text;
-    String password = _passwordController.text;
-
-    final url = Uri.parse('http://10.0.2.2:1000/login');
-    final response = await http.post(
-      url,
-      body: {
-        'username': username,
-        'password': password,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = json.decode(response.body);
-      bool isAuthenticated = data['authenticated'];
-
-      if (isAuthenticated) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DashboardPage(username: username),
-          ),
-        );
-      } else {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Login Failed'),
-              content: Text('Invalid username or password.'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            );
-          },
-        );
-      }
-    } else {
-      print('Request failed with status: ${response.statusCode}');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +75,9 @@ class _LoginFormState extends State<LoginForm> {
             SizedBox(height: 24.0),
             ElevatedButton(
               onPressed: () {
-                _login(context);
+                loginUser(_usernameController.text,
+                _passwordController.text,
+                 context);
               },
               child: Text('Login'),
             ),

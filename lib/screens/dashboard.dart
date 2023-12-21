@@ -1,10 +1,78 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class DashboardPage extends StatelessWidget {
-  final String username; // Menggunakan informasi yang diperoleh setelah login
-  String selectedShift = 'Shift 1'; // Nilai default untuk dropdown
+import 'transaksi.dart'; // Import halaman transaksi
 
-  DashboardPage({Key? key, required this.username}) : super(key: key);
+class DashboardPage extends StatefulWidget {
+  final String accessToken;
+
+  const DashboardPage({Key? key, required this.accessToken}) : super(key: key);
+
+  @override
+  _DashboardPageState createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  String username = '';
+  String selectedShift = 'Shift 1';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    final url = Uri.parse('http://10.0.2.2:1000/me');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Authorization': 'Bearer ${widget.accessToken}'},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        setState(() {
+          username = responseData['namapengguna'];
+        });
+      } else {
+        print('Failed to fetch user data');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
+
+  Future<void> fetchShiftData(String selectedShift) async {
+    final shift = selectedShift == 'Shift 1' ? 1 : 2;
+    final url = Uri.parse('http://10.0.2.2:1000/transaksi?shift=$shift');
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Authorization': 'Bearer ${widget.accessToken}',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TransactionPage(
+              accessToken: widget.accessToken,
+              selectedShift: selectedShift,
+            ),
+          ),
+        );
+      } else {
+        print('Failed to fetch shift data');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,20 +83,21 @@ class DashboardPage extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              'Welcome, $username', // Menampilkan nama petugas atau informasi lainnya
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              'Welcome, $username!',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 24.0),
             DropdownButton<String>(
               value: selectedShift,
               onChanged: (String? newValue) {
                 if (newValue != null) {
-                  // Saat nilai dropdown berubah
-                  // Lakukan sesuatu di sini, contohnya simpan nilai shift yang dipilih
-                  selectedShift = newValue;
+                  setState(() {
+                    selectedShift = newValue;
+                  });
                 }
               },
               items: <String>['Shift 1', 'Shift 2']
@@ -38,6 +107,13 @@ class DashboardPage extends StatelessWidget {
                   child: Text(value),
                 );
               }).toList(),
+            ),
+            SizedBox(height: 20.0),
+            ElevatedButton(
+              onPressed: () {
+                fetchShiftData(selectedShift);
+              },
+              child: Text('View Transactions'),
             ),
           ],
         ),
