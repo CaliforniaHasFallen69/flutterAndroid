@@ -19,11 +19,36 @@ class detailTransaksi extends StatefulWidget {
 }
 
 class _detailTransaksiState extends State<detailTransaksi> {
+  var selectedPayment = null;
+
   Future<Map<String, dynamic>> fetchdetailTransaksi(int idTransaksi) async {
     final response = await http.get(
       Uri.parse('http://10.0.2.2:1000/detailTransaksi/$idTransaksi'),
     );
     Map<String, dynamic> detailTransaksi = json.decode(response.body);
+
+    if (response.statusCode == 200) {
+      var newValue = null;
+      switch (detailTransaksi['transaksi']['metodepembayaran']) {
+        case 'cash':
+          newValue = 'Cash';
+          break;
+        case 'kartu kredit':
+          newValue = 'Kartu Kredit';
+          break;
+        case 'kartu debit':
+          newValue = 'Kartu Debit';
+          break;
+        case 'qris':
+          newValue = 'QRIS';
+          break;
+      }
+
+      selectedPayment = newValue;
+      print(detailTransaksi);
+    } else {
+      print('Failed to update transaction status');
+    }
 
     return detailTransaksi;
   }
@@ -82,6 +107,39 @@ class _detailTransaksiState extends State<detailTransaksi> {
     }
   }
 
+  Future<void> updateMetodePembayaran(String method) async {
+    try {
+      final response = await http.put(
+        Uri.parse(
+            'http://10.0.2.2:1000/updateMetodePembayaran/${widget.idTransaksi}'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({'metodepembayaran': method}),
+      );
+
+      if (response.statusCode == 200) {
+        // Navigator.pushReplacement(context,
+        //     MaterialPageRoute(builder: (context) {
+        //   return detailTransaksi(
+        //     idTransaksi: widget.idTransaksi,
+        //     accessToken: widget.accessToken,
+        //     selectedShift: widget.selectedShift,
+        //   );
+        // }
+        // )
+        // );
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Berhasil mengubah metode pembayaran"),
+        ));
+      } else {
+        print('Failed to update transaction status');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -123,6 +181,40 @@ class _detailTransaksiState extends State<detailTransaksi> {
           Text('Jumlah: ${transaction['jumlah']}'),
           Text('SubTotal: ${transaction['subtotal']}'),
           Text('Status: ${transaction['status']}'),
+          SizedBox(height: 20),
+          DropdownButton<String>(
+            value: selectedPayment,
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                setState(() {
+                  selectedPayment = newValue;
+                  switch (newValue) {
+                    case 'Cash':
+                      newValue = 'cash';
+                      break;
+                    case 'Kartu Kredit':
+                      newValue = 'kartu kredit';
+                      break;
+                    case 'Kartu Debit':
+                      newValue = 'kartu debit';
+                      break;
+                    case 'QRIS':
+                      newValue = 'qris';
+                      break;
+                  }
+                  updateMetodePembayaran(newValue!);
+                  fetchdetailTransaksi(widget.idTransaksi);
+                });
+              }
+            },
+            items: <String>['Cash', 'Kartu Kredit', 'Kartu Debit', 'QRIS']
+                .map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
